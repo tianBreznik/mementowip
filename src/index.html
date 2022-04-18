@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        *
+        {
+            margin: 0;
+            padding: 0;
+        }
+
+        @font-face {
+            font-family: "usaname_f";
+            src: url("yoster.ttf");
+        }
+
+        @font-face {
+            font-family: "DejaVu Sans";
+            src: url("fonts/DejaVuSans.ttf");
+        }
+        @font-face {
+            font-family: "Comic Helvetic";
+            src: url("ComicHelvetic_Heavy.otf");
+            font-weight: bold;
+        }
+        @font-face {
+            font-family: "Comic Helvetic";
+            src: url("ComicHelvetic_Light.otf");
+            font-weight: lighter;
+        }
+        @font-face {
+            font-family: "Comic Helvetic";
+            src: url("ComicHelvetic_Medium.otf");
+            font-weight: normal;
+        }
+
+        @font-face {
+            font-family: "Asap Condensed";
+            src: url("asap-condensed/AsapCondensed-Regular.ttf");
+        }
+
+        @font-face {
+            font-family: "Asap Condensed";
+            src: url("asap-condensed/AsapCondensed-MediumItalic.ttf");
+            font-style: italic;
+        }
+
+
+        html,
+        body
+        {
+            overflow: hidden;
+        }
+
+        .annotation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            margin-left: 15px;
+            margin-top: 15px;
+            padding: 1em;
+            width: max-content;
+            color: rgb(0, 0, 0);
+            background: rgb(255, 255, 255);
+            border-radius: .5em;
+            font-size: 12px;
+            line-height: 1.2;
+            transition: opacity .5s;
+            display: none;
+            border: 5px solid rgb(56, 196, 252);
+        }
+
+        #usaname 
+        {
+            font-family: "usaname_f";
+        }
+
+        #tweet 
+        {
+            font-family: "Asap Condensed";
+            width: 220px;
+        }
+
+        #namename 
+        {
+            font-family: "Asap Condensed";
+            font-style: italic;
+        }
+
+        .webgl
+        {
+            position: fixed;
+            top: 0;
+            left: 0;
+            outline: none;
+            
+        }
+
+        .inline 
+        {
+            display:inline-block;
+            vertical-align:middle;
+            padding-left: 5%;
+            /*border: 1px solid rgba(161, 42, 165, 0.377);*/
+        }
+
+        #header
+        {
+            display: inline;
+            vertical-align:middle;
+        }
+
+        #title 
+        {
+            font-family: "usaname_f";
+            color:rgb(28, 210, 255);
+            padding-left: 0.75em;
+            padding-top:0.25em;
+            position: absolute;
+            z-index: 1;
+        }
+
+        canvas {
+            image-rendering: pixelated;
+        }
+    </style>
+    <title>26 - Code structuring</title>
+</head>
+<body>
+    <h1 id="title">Memento;</h1>
+    <div class="annotation">
+        <div id="header">
+            <img src="disc.png" alt="pfp" style="width:50px;height:50px;border-radius:25px;display:inline-block;vertical-align: middle;">
+            <div class="inline">
+                <h3 id="usaname"><strong>BLABLABLA</strong></h3>
+                <h3 id="namename">bleak</h3>
+            </div>
+        </div>
+        <p id="desc"></p>
+        <p id="tweet"></p>
+    
+    </div>
+    <script type="x-shader/x-vertex" id="vertexshader">
+
+			attribute float size;
+			attribute vec3 customColor;
+
+			varying vec3 vColor;
+
+			void main() {
+
+				vColor = customColor;
+
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+
+				gl_PointSize = size * ( 300.0 / -mvPosition.z );
+
+				gl_Position = projectionMatrix * mvPosition;
+
+			}
+
+		</script>
+    <script type="x-shader/x-fragment" id="fragmentshader">
+
+        uniform vec3 color;
+        uniform sampler2D pointTexture;
+        uniform float alphaTest;
+
+        varying vec3 vColor;
+
+        void main() {
+
+            gl_FragColor = vec4( color * vColor, 1.0 );
+
+            gl_FragColor = gl_FragColor * texture2D( pointTexture, gl_PointCoord );
+
+            if ( gl_FragColor.a < alphaTest ) discard;
+
+        }
+
+    </script>
+
+    <div id="container" style="touch-action: none;"></div>
+</body>
+</html>
