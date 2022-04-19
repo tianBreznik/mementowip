@@ -20,11 +20,13 @@ import {
 } from "three"
 let renderer, scene, camera, stats, width, height, buff_geometry, canvas, composer, gui;
 let p_positions;
+let colors;
 var dat_es;
 var controls;
 let particles;
+let parentTransform;
 const PARTICLE_SIZE = 20;
-let raycaster, intersects;
+let raycaster, intersects, intersects_lines;
 let pointer, INTERSECTED;
 width = window.innerWidth;
 height = window.innerHeight;
@@ -70,54 +72,62 @@ function init() {
         .filter((v, i, vIds) => vIds.indexOf(v) !== i);
 
     var lines = {};
+    var lines_colors = {};
     lines.keys = duplicateIds;
-    console.log(lines['984588315327385600']); 
-    lines['984588315327385600'] = [new THREE.Vector3(1,1,1)];
-    console.log(lines['984588315327385600']);
-    console.log(lines);
+    lines_colors.keys = duplicateIds
+    //console.log(lines['984588315327385600']); 
+    //lines['984588315327385600'] = [new THREE.Vector3(1,1,1)];
+    //console.log(lines['984588315327385600']);
+    //console.log(lines);
 
     const axesHelper = new THREE.AxesHelper( 5 );
     scene.add( axesHelper );
 
-    p_positions = new Float32Array(dat_es.length * 3)
+    p_positions = new Float32Array(dat_es.length * 3);
+    colors = new Float32Array(dat_es.length * 3);
     for (let i = 0; i < dat_es.length; i++) {
         //(dat_es.float_minute)
         //x
-        p_positions[i * 3] =  (((dat_es[i].float_minute + (Math.random() - 0.5) * 2)/60) * 2 -1) * width 
+        p_positions[i * 3] =  (((dat_es[i].float_minute + (Math.random() - 0.5) * 2)/60) * 2 -1) * width;
         //y
-        p_positions[i * 3 + 1] = ((dat_es[i].float_hour/24.0) * 2 - 1) + (Math.random() - 0.5) * 500
+        p_positions[i * 3 + 1] = ((dat_es[i].float_hour/24.0) * 2 - 1) + (Math.random() - 0.5) * 500;
         //z
-        p_positions[i * 3 + 2] = ((dat_es[i].date_nr/365) * 2 - 1) * height
+        p_positions[i * 3 + 2] = ((dat_es[i].date_nr/365) * 2 - 1) * height;
+
+        colors[i * 3 + 0] = Math.random();
+        colors[i * 3 + 1] = Math.random();
+        colors[i * 3 + 2] = Math.random();
 
         var line_pos = new THREE.Vector3(p_positions[i*3], p_positions[i*3+1],p_positions[i*3+2]);
+        var col_pos = new THREE.Vector3(colors[i*3], colors[i*3 + 1], colors[i*3 + 2]);
 
         if(duplicateIds.includes(dat_es[i].conversation_id)){
-            console.log("checked");
             if (lines[dat_es[i].conversation_id]) {
                 lines[dat_es[i].conversation_id].push(line_pos);
+                lines_colors[dat_es[i].conversation_id].push(col_pos);
             } else {
                 lines[dat_es[i].conversation_id] = [line_pos];
+                lines_colors[dat_es[i].conversation_id] = [col_pos];
             }
         }
     }
-    console.log(lines);
 
     //randomize sprite colors
-
 	buff_geometry = new BufferGeometry()
     buff_geometry.setAttribute('position', new BufferAttribute(p_positions, 3))			
 	const positionAttribute = buff_geometry.getAttribute( 'position' );
 
-    const colors = [];
+    //const colors = [];
 	const sizes = [];
-	const color = new THREE.Color();
+	
     //const tw_urls = [];
 
     console.log(dat_es.conversation_id)
 
 	for ( let i = 0, l = positionAttribute.count; i < l; i ++ ) {
-		color.setHSL( 0.01 + 0.1 * ( i / l ), 1.0, 0.0 );
-		color.toArray( colors, i * 3 );
+        //var color = new THREE.Color();
+        //color.setHSL( Math.random() * 0xffffff );
+		//color.toArray( colors, i * 3 );
 		sizes[ i ] = PARTICLE_SIZE * 0.5;
         tw_text[ i ] = dat_es[ i ].text;
         user_name[ i ] = dat_es[ i ]['author.username'];
@@ -153,6 +163,7 @@ function init() {
 	particles = new THREE.Points( geometry, material );
 	scene.add( particles );
 	//lines
+    parentTransform = new THREE.Object3D();
     for(var key in lines){
 
         if(key == 'keys')
@@ -192,14 +203,15 @@ function init() {
         var line = new MeshLine();
         line.setGeometry(line_geometry);
 
-        var line_material = new MeshLineMaterial({color: new THREE.Color(0x000000), lineWidth:0.5, opacity:0.6});
+        var line_col = 'rgb(' + parseInt(lines_colors[key][0].x*255) + ',' + parseInt(lines_colors[key][0].y*255) + ',' + parseInt(lines_colors[key][0].z*255) + ')';
+        console.log(line_col)
+        var line_material = new MeshLineMaterial({color: new THREE.Color(line_col), lineWidth:0.8, opacity:0.6});
         var mesh = new THREE.Mesh(line.geometry, line_material);
-        // var line = new Line2( lin_geometry, matLine );
-        // line.computeLineDistances();
-        // line.scale.set( 1, 1, 1 );
-        // scene.add( line );
-        scene.add(mesh);   
+        //mesh.raycast = MeshLineRaycast;
+        parentTransform.add( mesh );
+        //scene.add(mesh);   
     }
+    scene.add( parentTransform );
 
 	renderer = new THREE.WebGLRenderer({
         precision: 'highp',
@@ -269,13 +281,24 @@ function onPointerMove( event ) {
 
 	raycaster.setFromCamera( pointer, camera );
 	intersects = raycaster.intersectObject( particles );
+    //intersects_lines = raycaster.intersectObjects( parentTransform.children, true );
+
     
 	if ( intersects.length > 0 ) {
 
         intersects = intersects.sort( function( a, b ) {
             return a.distanceToRay - b.distanceToRay;
         });
+        // if(intersects_lines.length > 0){
+        //     intersects_lines = intersects_lines.sort( function( a, b ) {
+        //         return a.distanceToRay - b.distanceToRay;
+        //     });
+        //     var line = intersects_lines[ 0 ];
+        //     console.log(line);
+        //     line.object.material.linewidth = 5.5;
+        // }
         var particle = intersects[ 0 ];
+
 
         //console.log( 'got a click on particle', user_name[ particle.index ]);
     
