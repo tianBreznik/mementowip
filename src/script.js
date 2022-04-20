@@ -378,10 +378,12 @@ function onPointerMove( event ) {
         annotation.style.display = `block`;
     
         attributes.size.array[ particle.index ] = PARTICLE_SIZE;
-        attributes.size.array[ particle.index ] = PARTICLE_SIZE * 1.25;
+        attributes.size.array[ particle.index ] = PARTICLE_SIZE * 2.5;
         attributes.size.needsUpdate = true;
     }
     else {
+        console.log('not intersecting nothing');
+        //attributes.size.array[ particle.index ] = PARTICLE_SIZE * 1.5;
         const annotation = document.querySelector('.annotation');
         annotation.style.display = `none`;
     }
