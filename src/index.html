@@ -126,24 +126,51 @@
         {
             font-family: "usaname_f";
             color:rgb(255, 66, 66);
-            position: fixed;
             bottom: 0.25em;
             left: 0.75em;
             position: absolute;
             z-index: 1;
             border-radius: .5em;
             border: 1px solid rgb(255, 66, 66);
+            height: 1.875em;
+            width: 175px;
+            text-align: center;
+            padding-top: 15px;
+        }
+
+        #footer
+        {
+            display: inline;
+            vertical-align:middle;
+        }
+
+        #prettythoughts {
+            font-family: "usaname_f";
+            color:rgb(255, 66, 66);
+            bottom: 0.45em;
+            left: 12.85em;
+            right: 1em;
+            position: absolute;
+            z-index: 1;
+            border-radius: .5em;
+            border: 1px solid rgb(255, 66, 66);
+            height: 2.725em;
+            text-align: center;
+            padding-top: 15px;
         }
 
         canvas {
             image-rendering: pixelated;
         }
     </style>
-    <title>26 - Code structuring</title>
+    <title>Revisiting the mess</title>
 </head>
 <body>
     <h1 id="title">Memento;</h1>
-    <h2 id="date">Nema</h2>
+    <div id="footer">
+        <h2 id="date">Nema</h2>
+        <p id="prettythoughts">I've had dreams so wonderful that I decide that they are memories. I relive them often and savor their sweetness until they are interchangeable with what's happened in my waking life. This is my greatest coping mechanism.</p>
+    </div>
     <div class="annotation">
         <div id="header">
             <img src="disc.png" alt="pfp" style="width:50px;height:50px;border-radius:25px;display:inline-block;vertical-align: middle;">

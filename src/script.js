@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
 import { MeshLine, MeshLineMaterial, MeshLineRaycast } from 'three.meshline';
 import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
@@ -45,6 +46,8 @@ var mouseX = 0, mouseY = 0;
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
 let pixelPass, params;
+let mouseDown = false;
+let scale = 5.0;
 const perlin = new ImprovedNoise();
 
 
@@ -74,6 +77,7 @@ function init() {
     //const ctx = container.getContext('2d');
 	scene = new THREE.Scene();
 	camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
+    //camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 )
 	camera.position.z = height;
 
     var dat_es = loadJSON('sorted_blm_10_minmin_w_pic.json');
@@ -114,7 +118,7 @@ function init() {
         //x
         p_positions[i * 3] =  (((dat_es[i].float_minute + (Math.random() - 0.5) * 2)/60) * 2 -1) * width;
         //y
-        p_positions[i * 3 + 1] = ((dat_es[i].float_hour/24.0) * 2 - 1) + (Math.random() - 0.5) * 500;
+        p_positions[i * 3 + 1] = ((dat_es[i].float_hour/24.0) * 2 - 1) + (Math.random() - 0.5) * height;
         //z
         p_positions[i * 3 + 2] = ((dat_es[i].date_nr/365) * 2 - 1) * height;
 
@@ -152,7 +156,7 @@ function init() {
         //var color = new THREE.Color();
         //color.setHSL( Math.random() * 0xffffff );
 		//color.toArray( colors, i * 3 );
-		sizes[ i ] = PARTICLE_SIZE * 0.5;
+		sizes[ i ] = PARTICLE_SIZE * 1.5;
         tw_text[ i ] = dat_es[ i ].text;
         user_name[ i ] = dat_es[ i ]['author.username'];
         user_pfp[ i ] = dat_es[ i ]['author.profile_image_url'];
@@ -256,7 +260,19 @@ function init() {
 	//container.appendChild( stats.dom );
 	//
 	window.addEventListener( 'resize', onWindowResize );
-	document.addEventListener( 'pointermove', onPointerMove );
+	window.addEventListener( 'pointermove', onPointerMove );
+    window.addEventListener('mousedown',()=>{
+        mouseDown = true
+        controls.lock();
+    
+    })
+    window.addEventListener('mouseup',()=>{
+        if(mouseDown){
+            mouseDown = false
+            controls.unlock()
+        }
+    })
+    window.addEventListener( 'wheel', onWheelScroll, false );
 
     params = {
         pixelSize: 3,
@@ -277,10 +293,23 @@ function init() {
     //document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 
     //controls = new OrbitControls( camera, renderer.domElement );
-    controls = new TrackballControls( camera, renderer.domElement );
+    const old_rotation_x = camera.rotation.x;
+    const old_rotation_y = camera.rotation.y;
+    controls = new PointerLockControls(camera, renderer.domElement );
+    controls.addEventListener('lock', function(){
+        camera.rotation.x = mouseY / scale;
+        camera.rotation.y = mouseX / scale;
+    })
+    controls.addEventListener('unlock', function(){
+        //camera.rotation.x = old_rotation_x;
+        //camera.rotation.y = old_rotation_y;
+        console.log('freeze')
+    })
+    //controls = new TrackballControls( camera, renderer.domElement );
     //controls.enableDamping = true;
     //controls.dampingFactor = 0.25;
-    //controls.enableZoom = true;
+    //controls.enableZoom = false;
+    //controls.enablePan = false;
     //controls.autoRotate = true;
 }
 
@@ -290,10 +319,6 @@ function filterById(jsonObject, id) {
         return (jsonObject['conversation_id'] == id);
     });
 }
-
-// function interfill_w_noise(valls){
-
-// }
 
 function onPointerMove( event ) {
 	pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -364,9 +389,8 @@ function onPointerMove( event ) {
 
 function onDocumentMouseMove( event ) {
 
-    mouseX = event.clientX - windowHalfX;
-    mouseY = event.clientY - windowHalfY;
-
+    camera.rotation.x = mouseY / scale;
+    camera.rotation.y = mouseX / scale;
 }
 
 function onWindowResize() {
@@ -374,10 +398,22 @@ function onWindowResize() {
 	camera.updateProjectionMatrix();
 	renderer.setSize( window.innerWidth, window.innerHeight );
 }
+
+function onWheelScroll(event) {
+    console.log('scrolling');
+    //event.preventDefault();
+    console.log(event);
+    console.log(event.deltaZ);
+
+    camera.position.z += event.deltaY / 10;
+  
+    // prevent scrolling beyond a min/max value
+    //camera.position.clampScalar(0, 10);
+}
 var camera_date;
 function animate() {
     
-    controls.update();
+    //controls.update();
     updateGUI();
     //p_positions[i * 3 + 2] = ((dat_es[i].date_nr/365) * 2 - 1) * height;
     //365/2 * ((z+h)/2h) = date_nr
