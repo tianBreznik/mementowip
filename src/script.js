@@ -26,7 +26,7 @@ var controls;
 let particles;
 let parentTransform;
 const PARTICLE_SIZE = 20;
-let raycaster, intersects, intersects_lines;
+let raycaster, intersects, intersects_lines, date_dictionary;
 let pointer, INTERSECTED;
 width = window.innerWidth;
 height = window.innerHeight;
@@ -57,16 +57,40 @@ function updateGUI() {
 
 }
 
+async function loadFileAndPrintToConsole(url) {
+    try {
+      const response = await fetch(url);
+      var data =  response.text();
+      //console.log(data);
+      return data;
+    } catch (err) {
+      //console.error(err);
+      return '';
+    }
+}
 
 function init() {
 	const container = document.getElementById( 'container' );
     //const ctx = container.getContext('2d');
 	scene = new THREE.Scene();
 	camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
-	camera.position.z = 500;
+	camera.position.z = height;
 
     var dat_es = loadJSON('sorted_blm_10_minmin_w_pic.json');
+    
+    //load date lookup table
+    date_dictionary = new Map();
+    var dict_str = loadTextFileAjaxSync('lookup_date.csv', "application/csv");
+    console.log(dict_str)
 
+
+    dict_str.split("\n").forEach(line => {
+        const [key, val] = line.split(",");
+        date_dictionary.set(key, val);   
+    });
+
+    console.log(date_dictionary.get('20')); // value2
+    
     const duplicateIds = dat_es
         .map(v => v.conversation_id)
         .filter((v, i, vIds) => vIds.indexOf(v) !== i);
@@ -122,7 +146,7 @@ function init() {
 	
     //const tw_urls = [];
 
-    console.log(dat_es.conversation_id)
+    //console.log(dat_es.conversation_id)
 
 	for ( let i = 0, l = positionAttribute.count; i < l; i ++ ) {
         //var color = new THREE.Color();
@@ -181,7 +205,7 @@ function init() {
 
         
         for(let j=1; j<new_noise.length - 1; j+=2){
-            console.log(j);
+            //console.log(j);
             dummy_vec.addVectors(new_noise[j-1], new_noise[j+1]);
             dummy_vec = dummy_vec.multiplyScalar(0.5);
             new_noise[j] = new THREE.Vector3(
@@ -190,7 +214,7 @@ function init() {
                      dummy_vec.z + 100*perlin.noise(dummy_vec.x, dummy_vec.y, dummy_vec.z) + Math.random()*10
                 );
         }
-        console.log(new_noise);
+        //console.log(new_noise);
 
         //curves not lines
         const curve = new THREE.CatmullRomCurve3(
@@ -204,7 +228,7 @@ function init() {
         line.setGeometry(line_geometry);
 
         var line_col = 'rgb(' + parseInt(lines_colors[key][0].x*255) + ',' + parseInt(lines_colors[key][0].y*255) + ',' + parseInt(lines_colors[key][0].z*255) + ')';
-        console.log(line_col)
+        //console.log(line_col)
         var line_material = new MeshLineMaterial({color: new THREE.Color(line_col), lineWidth:0.8, opacity:0.6});
         var mesh = new THREE.Mesh(line.geometry, line_material);
         //mesh.raycast = MeshLineRaycast;
@@ -279,9 +303,10 @@ function onPointerMove( event ) {
     const geometry = particles.geometry;
 	const attributes = geometry.attributes;
 
+
 	raycaster.setFromCamera( pointer, camera );
 	intersects = raycaster.intersectObject( particles );
-    //intersects_lines = raycaster.intersectObjects( parentTransform.children, true );
+    //intersects_lines = raycaster.intersectObjects( parentTransform.children, true )
 
     
 	if ( intersects.length > 0 ) {
@@ -349,10 +374,23 @@ function onWindowResize() {
 	camera.updateProjectionMatrix();
 	renderer.setSize( window.innerWidth, window.innerHeight );
 }
+var camera_date;
 function animate() {
     
     controls.update();
     updateGUI();
+    //p_positions[i * 3 + 2] = ((dat_es[i].date_nr/365) * 2 - 1) * height;
+    //365/2 * ((z+h)/2h) = date_nr
+    camera_date = parseInt(365*(camera.position.z + height)/(2*height));
+    const date_el = document.querySelector('#date');
+    var date_lit = date_dictionary.get(String(camera_date));
+    if(typeof date_lit === 'undefined'){
+        date_el.innerHTML = 'the before'
+    }
+    else{
+        date_el.innerHTML = date_dictionary.get(String(camera_date));
+    }
+    //console.log(camera_date);
 
 	requestAnimationFrame( animate );
 	//render();
