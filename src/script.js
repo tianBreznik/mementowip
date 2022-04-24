@@ -390,6 +390,18 @@ function onPointerMove( event ) {
         annotation.style.display = `block`;
 
         annotation.children[3].innerHTML = date_tw[particle.index];
+
+        /**
+         * FIX LATER - ZA SUMNIKE FONT ZRIHTAJ!
+         */
+        // if(document.getElementById("selelelect") == "#dovolJJ")
+        // {
+        //     var element_desc = document.getElementById("desc");
+        //     element_desc.style.fontFamily = "monospace";
+
+        //     var element_tweet = document.getElementById("tweet");
+        //     element_tweet.style.fontFamily = "monospace";
+        // }
     
         attributes.size.array[ particle.index ] = PARTICLE_SIZE;
         attributes.size.array[ particle.index ] = PARTICLE_SIZE * 2.5;
@@ -419,7 +431,7 @@ function onWheelScroll(event) {
     //console.log('scrolling');
     //event.preventDefault();
 
-    camera.position.z += event.deltaY / 10;
+    camera.position.z += event.deltaY / 5;
   
     // prevent scrolling beyond a min/max value
     //camera.position.clampScalar(0, 10);
@@ -612,6 +624,12 @@ function reInitWNewDates(values) {
           var dat_es = loadJSON('sorted_farmers_10_minmin_w_pic.json');
           console.log("#Capitol");
           break;
+        case "#dovolJJ":
+            //Statements executed when the
+            //result of expression matches valueN
+            var dat_es = loadJSON('sorted_jj_10_minmin_w_pic.json');
+            console.log("#Capitol");
+            break;
         default:
           //Statements executed when none of
           //the values match the value of the expression
