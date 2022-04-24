@@ -65,11 +65,12 @@
             color: rgb(0, 0, 0);
             background: rgb(255, 255, 255);
             border-radius: .5em;
-            font-size: 12px;
+            font-size: 16px;
             line-height: 1.2;
             transition: opacity .5s;
             display: none;
             border: 5px solid rgb(56, 196, 252);
+            text-align: left;
         }
 
         #usaname 
@@ -77,24 +78,69 @@
             font-family: "usaname_f";
         }
 
+        #tweet_div {
+            border-radius: .5em;
+            background-color: rgba(56, 196, 252);
+            margin-bottom: 0.5em;
+            font-family: "Asap Condensed";
+            display:grid;
+        }
+
+        #brd_tweet {
+            width:135px;
+            border-radius: .5em;
+            margin-top:-8px;
+            margin-left:5px;
+            background:rgba(56, 196, 252);
+            font-family: "usaname_f";
+        }
+
         #tweet 
         {
             font-family: "Asap Condensed";
-            width: 220px;
+            white-space: pre-line;
+        }
+
+        #desc_div 
+        {
+            border-radius: .5em;
+            border: 0.5px solid rgb(0, 0, 0);
+            margin-bottom: 1.1em;
+            font-family: "Asap Condensed";
+            display:grid;
+        }
+        
+
+        #brd_desc {
+            width:120px;
+            margin-top:-8px;
+            margin-left:5px;
+            background:white;
+            font-family: "usaname_f";
+        }
+
+        #desc 
+        {
         }
 
         #namename 
         {
             font-family: "Asap Condensed";
+            margin-bottom: 0.5em;
         }
 
+        #tw_date {
+            font-family: "usaname_f";
+            border-radius: .5em;
+            background-color: rgb(255, 226, 62); 
+            width:130px;
+        }
         .webgl
         {
             position: fixed;
             top: 0;
             left: 0;
             outline: none;
-            
         }
 
         .inline 
@@ -109,6 +155,11 @@
         {
             display: inline;
             vertical-align:middle;
+            margin-bottom: 0.5em;
+        }
+
+        #pfp {
+            margin-bottom: 0.5em;
         }
 
         #title 
@@ -119,6 +170,7 @@
             padding-top:0.25em;
             position: absolute;
             z-index: 1;
+            margin-bottom: 2em;
         }
 
 
@@ -138,10 +190,18 @@
             padding-top: 15px;
         }
 
-        #footer
-        {
+        #footer{
             display: inline;
             vertical-align:middle;
+        }
+
+        #datasets {
+            -webkit-appearance: none;
+            position: absolute;
+            z-index: 1;
+            padding-left: 0.75em;
+            padding-top:0.5em;
+
         }
 
         #prettythoughts {
@@ -162,25 +222,121 @@
         canvas {
             image-rendering: pixelated;
         }
+
+        .custom-select {
+          position: absolute;
+          font-family: Arial;
+          padding-left: 1.45em;
+          padding-top: 2.5em;
+        }
+
+        .custom-select select {
+          display: none; /*hide original SELECT element:*/
+          border: 6px solid transparent;
+          border: 1px solid rgb(0, 0, 0);
+        }
+
+        .select-selected {
+          background-color: rgba(255, 255, 255, 0);
+          border-radius: .5em; 
+          border: 1px solid rgb(0, 0, 0);   
+          width: 175px;    
+          padding-left: 0.5em;
+        }
+
+        /*style the arrow inside the select element:*/
+        .select-selected:after {
+          position: absolute;
+          content: "";
+          top: 14px;
+          right: 10px;
+          width: 0;
+          height: 0;      
+          border-radius: .5em; 
+          border: 1px solid rgb(0, 0, 0);
+        }
+
+        /*point the arrow upwards when the select box is open (active):*/
+        .select-selected.select-arrow-active:after {
+          border: 1px solid rgb(255, 226, 62);        
+          top: 7px;
+        }
+
+        /*style the items (options), including the selected item:*/
+        .select-items div,.select-selected {
+          color: #000000;
+          background-color: rgba(255, 255, 255, 0);
+          font-family: "usaname_f";
+          padding: 8px 16px;
+          cursor: pointer;
+          user-select: none;
+        }
+
+        /*style items (options):*/
+        .select-items {
+          position: absolute;
+          background-color: transparent;
+          top: 100%;
+          left: 1.45em;
+          right: 0;
+          border: 1px solid rgb(0, 0, 0); 
+          border-radius: .5em; 
+          z-index: 99;
+          width:195px;
+        }
+
+        /*hide the items when the select box is closed:*/
+        .select-hide {
+          display: none;
+        }
+
+        .select-items div:hover, .same-as-selected {
+          background-color: rgb(255, 226, 0.1);
+          border-radius: 0.5em;
+        }
     </style>
     <title>Revisiting the mess</title>
 </head>
 <body>
-    <h1 id="title">Memento;</h1>
+
+    <h1 id="title">Memento;</h1> 
+    <div class="custom-select" style="width:200px;">
+        <select onChange="new_dat_es();" id="selelelect">
+            <option value="0">Select dataset (&num;):</option>
+            <option value="1">&num;BlackLivesMatter</option>
+            <option value="2">&num;Afghanistan</option>
+            <option value="3">&num;StopTheSteal</option>
+            <option value="4">&num;mybodymychoice</option>
+            <option value="5">&num;FarmersProtest</option>
+            <option value="6">&num;Volitve2022</option>
+        </select>
+    </div>
     <div id="footer">
         <h2 id="date">Nema</h2>
         <p id="prettythoughts">I've had dreams so wonderful that I decide that they are memories. I relive them often and savor their sweetness until they are interchangeable with what's happened in my waking life. This is my greatest coping mechanism.</p>
     </div>
     <div class="annotation">
         <div id="header">
-            <img src="disc.png" alt="pfp" style="width:50px;height:50px;border-radius:25px;display:inline-block;vertical-align: middle;">
+            <img src="disc.png" id="pfp" alt="pfp" style="width:50px;height:50px;border-radius:25px;display:inline-block;vertical-align: middle;">
             <div class="inline">
                 <h3 id="usaname"><strong>BLABLABLA</strong></h3>
                 <h3 id="namename">bleak</h3>
             </div>
         </div>
-        <p id="desc"></p>
-        <p id="tweet"></p>
+
+        <div id="desc_div">
+            <h4 id="brd_desc">Description:</h4>
+            <p id="desc"></p>
+        </div>
+
+        <div id="tweet_div">
+            <h4 id="brd_tweet">Says (tweet):</h4>
+            <p id="tweet"></p>
+        </div>
+
+        <h4 id="tw_date"></h4>
+	    
+	    
     
     </div>
     <script type="x-shader/x-vertex" id="vertexshader">
