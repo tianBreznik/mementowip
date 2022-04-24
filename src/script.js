@@ -80,7 +80,9 @@ function init() {
 	camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
     //camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 )
 	camera.position.z = -height;
-    camera.lookAt( new THREE.Vector3(0, 0, 0) )
+    camera.rotation.y = 180 * THREE.Math.DEG2RAD;
+    console.log(camera.rotation)
+    //camera.lookAt( new THREE.Vector3(0, 0, 0) )
 
     var dat_es = loadJSON('sorted_blm_10_minmin_w_pic.json');
     
@@ -259,6 +261,7 @@ function init() {
 	//
 	window.addEventListener( 'resize', onWindowResize );
 	window.addEventListener( 'pointermove', onPointerMove );
+    console.log(camera.position);
     window.addEventListener('mousedown',()=>{
         mouseDown = true
         if(!document.querySelectorAll( ":hover" )[2].className.includes('gui') && !document.querySelectorAll( ":hover" )[2].className.includes('custom-select')){
@@ -300,8 +303,12 @@ function init() {
     const old_rotation_y = camera.rotation.y;
     controls = new PointerLockControls(camera, renderer.domElement );
     controls.addEventListener('lock', function(){
-        camera.rotation.x = mouseY / scale;
-        camera.rotation.y = mouseX / scale;
+        console.log("mouse clicked")
+        //console.log(camera.position);
+        console.log(height);
+        camera.rotation.x = mouseX / scale;
+        camera.rotation.y = mouseY / scale + 180 * THREE.Math.DEG2RAD;
+        console.log(camera.rotation);
     })
     controls.addEventListener('unlock', function(){
         //camera.rotation.x = old_rotation_x;
@@ -588,11 +595,12 @@ function loadJSON(filePath) {
 
 function reInitWNewDates(values) {
     console.log(values);
-
     scene.remove(parentTransform);
     scene.remove(particles);
-    camera.position.z = -height;
-    camera.lookAt( new THREE.Vector3(0, 0, 0) )
+    camera.position.z = height;
+    camera.rotation.y = 180 * THREE.Math.DEG2RAD;
+    console.log(camera.rotation);
+    //camera.lookAt( new THREE.Vector3(0, 0, 0) )
 
     //var dat_es = loadJSON('sorted_blm_10_minmin_w_pic.json');
     switch (values) {
