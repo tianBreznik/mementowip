@@ -306,8 +306,8 @@ function init() {
         console.log("mouse clicked")
         //console.log(camera.position);
         console.log(height);
-        camera.rotation.x = mouseX / scale;
-        camera.rotation.y = mouseY / scale + 180 * THREE.Math.DEG2RAD;
+        camera.rotation.x = mouseX / scale + 180 * THREE.Math.DEG2RAD;
+        camera.rotation.y = mouseY / scale;
         console.log(camera.rotation);
     })
     controls.addEventListener('unlock', function(){
