@@ -597,7 +597,7 @@ function reInitWNewDates(values) {
     console.log(values);
     scene.remove(parentTransform);
     scene.remove(particles);
-    camera.position.z = height;
+    camera.position.z = -height;
     camera.rotation.y = 180 * THREE.Math.DEG2RAD;
     console.log(camera.rotation);
     //camera.lookAt( new THREE.Vector3(0, 0, 0) )
