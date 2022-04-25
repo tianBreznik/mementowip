@@ -598,9 +598,9 @@ function reInitWNewDates(values) {
     scene.remove(parentTransform);
     scene.remove(particles);
     camera.position.z = -height;
-    camera.rotation.y = 180 * THREE.Math.DEG2RAD;
+    //camera.rotation.y = 180 * THREE.Math.DEG2RAD;
     console.log(camera.rotation);
-    //camera.lookAt( new THREE.Vector3(0, 0, 0) )
+    camera.lookAt( new THREE.Vector3(0, 0, 0) )
 
     //var dat_es = loadJSON('sorted_blm_10_minmin_w_pic.json');
     switch (values) {
