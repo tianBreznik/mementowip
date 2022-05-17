@@ -73,6 +73,7 @@ async function loadFileAndPrintToConsole(url) {
     }
 }
 
+var first = 0;
 function init() {
 	const container = document.getElementById( 'container' );
     //const ctx = container.getContext('2d');
@@ -81,6 +82,7 @@ function init() {
     //camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 )
 	camera.position.z = -height;
     camera.rotation.y = 180 * THREE.Math.DEG2RAD;
+    //camera.rotation.z = 180 * THREE.Math.DEG2RAD;
     console.log(camera.rotation)
     //camera.lookAt( new THREE.Vector3(0, 0, 0) )
 
@@ -151,12 +153,24 @@ function init() {
     //const tw_urls = [];
 
     //console.log(dat_es.conversation_id)
-
+    console.log(positionAttribute.count);
 	for ( let i = 0, l = positionAttribute.count; i < l; i ++ ) {
         //var color = new THREE.Color();
         //color.setHSL( Math.random() * 0xffffff );
 		//color.toArray( colors, i * 3 );
 		sizes[ i ] = PARTICLE_SIZE * 1.5;
+        let dup_col = lines_colors[dat_es[ i ].conversation_id]
+        if(dup_col){
+            //console.log("bla");
+            colors[i*3 + 0] = dup_col[0].x;
+            colors[i*3 + 1] = dup_col[0].y;
+            colors[i*3 + 2] = dup_col[0].z;
+        } 
+        else {
+            colors[i * 3 + 0] = Math.random();
+            colors[i * 3 + 1] = Math.random();
+            colors[i * 3 + 2] = Math.random();
+        }
         tw_text[ i ] = dat_es[ i ].text;
         user_name[ i ] = dat_es[ i ]['author.username'];
         user_pfp[ i ] = dat_es[ i ]['author.profile_image_url'];
@@ -232,12 +246,10 @@ function init() {
         line.setGeometry(line_geometry);
 
         var line_col = 'rgb(' + parseInt(lines_colors[key][0].x*255) + ',' + parseInt(lines_colors[key][0].y*255) + ',' + parseInt(lines_colors[key][0].z*255) + ')';
-        //console.log(line_col)
         var line_material = new MeshLineMaterial({color: new THREE.Color(line_col), lineWidth:0.8, opacity:0.6});
         var mesh = new THREE.Mesh(line.geometry, line_material);
         //mesh.raycast = MeshLineRaycast;
         parentTransform.add( mesh );
-        //scene.add(mesh);   
     }
     scene.add( parentTransform );
 
@@ -256,15 +268,14 @@ function init() {
 	pointer = new THREE.Vector2();
 	//
 
-	//stats = new Stats();
-	//container.appendChild( stats.dom );
-	//
 	window.addEventListener( 'resize', onWindowResize );
 	window.addEventListener( 'pointermove', onPointerMove );
+    //document.getElementById("intro").addEventListener("mouseenter", function(  ) {isOnDiv=true;});
+    //document.getElementById("intro").addEventListener("mouseout", function(  ) {isOnDiv=false;});
     console.log(camera.position);
     window.addEventListener('mousedown',()=>{
         mouseDown = true
-        if(!document.querySelectorAll( ":hover" )[2].className.includes('gui') && !document.querySelectorAll( ":hover" )[2].className.includes('custom-select')){
+        if(!document.querySelectorAll( ":hover" )[2].className.includes('gui') && !document.querySelectorAll( ":hover" )[2].className.includes('custom-select') && !document.querySelectorAll( ":hover" )[3].className.includes('incognito')){
             console.log("hovering over custom select");
             controls.lock();
         }
@@ -282,7 +293,7 @@ function init() {
     //document.getElementById("selelelect").addEventListener( "change", new_dat_es);
 
     params = {
-        pixelSize: 3,
+        pixelSize: 32,
         postprocessing: true
     };
     gui = new GUI();
@@ -295,7 +306,7 @@ function init() {
     pixelPass = new ShaderPass( PixelShader );
     pixelPass.uniforms[ 'resolution' ].value = new THREE.Vector2( window.innerWidth, window.innerHeight );
     pixelPass.uniforms[ 'resolution' ].value.multiplyScalar( window.devicePixelRatio );
-    pixelPass.uniforms[ 'pixelSize' ].value = 1;
+    pixelPass.uniforms[ 'pixelSize' ].value = 32;
     composer.addPass( pixelPass );
 
     //controls = new OrbitControls( camera, renderer.domElement );
@@ -303,25 +314,29 @@ function init() {
     const old_rotation_y = camera.rotation.y;
     controls = new PointerLockControls(camera, renderer.domElement );
     controls.addEventListener('lock', function(){
-        console.log("mouse clicked")
-        //console.log(camera.position);
-        console.log(height);
-        camera.rotation.x = mouseX / scale + 180 * THREE.Math.DEG2RAD;
-        camera.rotation.y = mouseY / scale;
-        console.log(camera.rotation);
+        if(!document.querySelectorAll( ":hover" )[3].className.includes('incognito'))
+        {
+            console.log("mouse clicked")
+            console.log(!document.querySelectorAll( ":hover" )[3].className.includes('incognito'));
+            if(first == 0){
+                camera.rotation.x = mouseY / scale + 180 * THREE.Math.DEG2RAD;
+                camera.rotation.z = 180 * THREE.Math.DEG2RAD;
+                camera.rotation.y = mouseX / scale;
+            }
+            else{
+                camera.rotation.x += mouseY / scale;
+                camera.rotation.y += mouseX / scale;
+            }
+            console.log(camera.rotation);
+            first += 1;
+        }
     })
     controls.addEventListener('unlock', function(){
-        //camera.rotation.x = old_rotation_x;
-        //camera.rotation.y = old_rotation_y;
         console.log('freeze')
     })
-    //controls = new TrackballControls( camera, renderer.domElement );
-    //controls.enableDamping = true;
-    //controls.dampingFactor = 0.25;
-    //controls.enableZoom = false;
-    //controls.enablePan = false;
-    //controls.autoRotate = true;
 }
+
+var isOnDiv = false;
 
 
 function filterById(jsonObject, id) {
@@ -329,6 +344,42 @@ function filterById(jsonObject, id) {
         return (jsonObject['conversation_id'] == id);
     });
 }
+
+var bttn_click = false;
+document.getElementById("continue").onclick = function() {
+    bttn_click = true;
+    console.log("clicked - classic");
+    var fadeOutTarget = document.getElementById("intro");
+    var fadeInTargetDate = document.getElementById("date");
+    var fadeInTargetThought = document.getElementById("prettythoughts");
+    var fadeInTargetSelect = document.getElementsByClassName("select-selected")[0];
+    var fadeEffect = setInterval(function () {
+        if (!fadeOutTarget.style.opacity) {
+            fadeOutTarget.style.opacity = 1;
+        }
+        if (fadeOutTarget.style.opacity > 0 && fadeInTargetDate.style.opacity < 1 && fadeInTargetThought.style.opacity < 1) {
+            fadeOutTarget.style.opacity -= 0.1;
+        } else {
+            fadeOutTarget.style.display = "none";
+            clearInterval(fadeEffect);
+        }
+    }, 100);
+
+    var op = 0.1;  // initial opacity
+    var timer = setInterval(function () {
+        if (op >= 1){
+            clearInterval(timer);
+        }
+        fadeInTargetDate.style.opacity = op;
+        fadeInTargetDate.style.filter = 'alpha(opacity=' + op * 100 + ")";
+        fadeInTargetThought.style.opacity = op;
+        fadeInTargetThought.style.filter = 'alpha(opacity=' + op * 100 + ")";
+        fadeInTargetSelect.style.opacity = op;
+        fadeInTargetSelect.style.filter = 'alpha(opacity=' + op * 100 + ")";
+        
+        op += op * 0.1;
+    }, 50);
+};
 
 function onPointerMove( event ) {
 
@@ -344,81 +395,82 @@ function onPointerMove( event ) {
 	intersects = raycaster.intersectObject( particles );
     //intersects_lines = raycaster.intersectObjects( parentTransform.children, true )
     
-	if ( intersects.length > 0 ) {
 
-        intersects = intersects.sort( function( a, b ) {
-            return a.distanceToRay - b.distanceToRay;
-        });
-        // if(intersects_lines.length > 0){
-        //     intersects_lines = intersects_lines.sort( function( a, b ) {
-        //         return a.distanceToRay - b.distanceToRay;
-        //     });
-        //     var line = intersects_lines[ 0 ];
-        //     console.log(line);
-        //     line.object.material.linewidth = 5.5;
-        // }
-        var particle = intersects[ 0 ];
+    if(!document.querySelectorAll( ":hover" )[3].className.includes('incognito')){
+        if ( intersects.length > 0 ) {
 
-
-        //console.log( 'got a click on particle', user_name[ particle.index ]);
+            intersects = intersects.sort( function( a, b ) {
+                return a.distanceToRay - b.distanceToRay;
+            });
+            // if(intersects_lines.length > 0){
+            //     intersects_lines = intersects_lines.sort( function( a, b ) {
+            //         return a.distanceToRay - b.distanceToRay;
+            //     });
+            //     var line = intersects_lines[ 0 ];
+            //     console.log(line);
+            //     line.object.material.linewidth = 5.5;
+            // }
+            var particle = intersects[ 0 ];
     
-        var glue_vec = new THREE.Vector3(
-            attributes.position.array[ particle.index * 3 ],
-            attributes.position.array[ particle.index * 3 + 1],
-            attributes.position.array[ particle.index * 3 + 2]
-        );
     
-        glue_vec.project(camera);
+            //console.log( 'got a click on particle', user_name[ particle.index ]);
+        
+            var glue_vec = new THREE.Vector3(
+                attributes.position.array[ particle.index * 3 ],
+                attributes.position.array[ particle.index * 3 + 1],
+                attributes.position.array[ particle.index * 3 + 2]
+            );
+        
+            glue_vec.project(camera);
+        
+            glue_vec.x = Math.round((0.5 + glue_vec.x / 2) * (canvas.width / window.devicePixelRatio));
+            glue_vec.y = Math.round((0.5 - glue_vec.y / 2) * (canvas.height / window.devicePixelRatio));
+        
+            const annotation = document.querySelector('.annotation');
+            annotation.children[0].lastChild.firstChild.innerHTML = "<strong>" + user_name[ particle.index ] + "</strong> |  ";
+            annotation.children[0].lastChild.firstChild.style.color = "#" + Math.floor(Math.random()*16777215).toString(16);
+            annotation.style.top = `${glue_vec.y}px`;
+            annotation.style.left = `${glue_vec.x}px`;
+            console.log(conv_ids[ particle.index]);
     
-        glue_vec.x = Math.round((0.5 + glue_vec.x / 2) * (canvas.width / window.devicePixelRatio));
-        glue_vec.y = Math.round((0.5 - glue_vec.y / 2) * (canvas.height / window.devicePixelRatio));
+            annotation.children[0].firstChild.src = user_pfp[ particle.index ];
+        
+            annotation.children[0].lastChild.lastChild.innerHTML = auth_name[ particle.index ];
+        
+            var newline_tw = tw_text[ particle.index ].split(/\r\n|\r|\n/g);
+            //(newline_tw);
+            const match = /\r|\n/.exec(tw_text[particle.index].trim());
     
-        const annotation = document.querySelector('.annotation');
-        annotation.children[0].lastChild.firstChild.innerHTML = "<strong>" + user_name[ particle.index ] + "</strong> |  ";
-        annotation.children[0].lastChild.firstChild.style.color = "#" + Math.floor(Math.random()*16777215).toString(16);
-        annotation.style.top = `${glue_vec.y}px`;
-        annotation.style.left = `${glue_vec.x}px`;
-
-        annotation.children[0].firstChild.src = user_pfp[ particle.index ];
+            annotation.children[1].lastChild.innerHTML = user_desc[particle.index];
+            annotation.children[1].style.width = `${document.getElementById('header').offsetWidth}px`;
+            annotation.children[2].lastChild.innerHTML = newline_tw;
+            annotation.children[2].style.width = `${document.getElementById('header').offsetWidth}px`;
+            annotation.style.display = `block`;
     
-        annotation.children[0].lastChild.lastChild.innerHTML = auth_name[ particle.index ];
+            annotation.children[3].innerHTML = date_tw[particle.index];
     
-        var newline_tw = tw_text[ particle.index ].split(/\r\n|\r|\n/g);
-        //(newline_tw);
-        const match = /\r|\n/.exec(tw_text[particle.index].trim());
-
-        annotation.children[1].lastChild.innerHTML = user_desc[particle.index];
-        annotation.children[1].style.width = `${document.getElementById('header').offsetWidth}px`;
-        //console.log(match)
-        annotation.children[2].lastChild.innerHTML = newline_tw;
-        //console.log(document.getElementById('header').offsetWidth);
-        annotation.children[2].style.width = `${document.getElementById('header').offsetWidth}px`;
-        //console.log(annotation.children);
-        annotation.style.display = `block`;
-
-        annotation.children[3].innerHTML = date_tw[particle.index];
-
-        /**
-         * FIX LATER - ZA SUMNIKE FONT ZRIHTAJ!
-         */
-        // if(document.getElementById("selelelect") == "#dovolJJ")
-        // {
-        //     var element_desc = document.getElementById("desc");
-        //     element_desc.style.fontFamily = "monospace";
-
-        //     var element_tweet = document.getElementById("tweet");
-        //     element_tweet.style.fontFamily = "monospace";
-        // }
+            /**
+             * FIX LATER - ZA SUMNIKE FONT ZRIHTAJ!
+             */
+            // if(document.getElementById("selelelect") == "#dovolJJ")
+            // {
+            //     var element_desc = document.getElementById("desc");
+            //     element_desc.style.fontFamily = "monospace";
     
-        attributes.size.array[ particle.index ] = PARTICLE_SIZE;
-        attributes.size.array[ particle.index ] = PARTICLE_SIZE * 2.5;
-        attributes.size.needsUpdate = true;
-    }
-    else {
-        //console.log('not intersecting nothing');
-        //attributes.size.array[ particle.index ] = PARTICLE_SIZE * 1.5;
-        const annotation = document.querySelector('.annotation');
-        annotation.style.display = `none`;
+            //     var element_tweet = document.getElementById("tweet");
+            //     element_tweet.style.fontFamily = "monospace";
+            // }
+            console.log(like_cnt[particle.index]);
+            attributes.size.array[ particle.index ] = PARTICLE_SIZE;
+            attributes.size.array[ particle.index ] = PARTICLE_SIZE * like_cnt[particle.index];
+            attributes.size.needsUpdate = true;
+        }
+        else {
+            //console.log('not intersecting nothing');
+            //attributes.size.array[ particle.index ] = PARTICLE_SIZE * 1.5;
+            const annotation = document.querySelector('.annotation');
+            annotation.style.display = `none`;
+        }
     }
 }
 
@@ -426,6 +478,7 @@ function onDocumentMouseMove( event ) {
 
     camera.rotation.x = mouseY / scale;
     camera.rotation.y = mouseX / scale;
+    //camera.rotation.z += 180 * THREE.Math.DEG2RAD;
 }
 
 function onWindowResize() {
@@ -435,20 +488,14 @@ function onWindowResize() {
 }
 
 function onWheelScroll(event) {
-    //console.log('scrolling');
-    //event.preventDefault();
-
-    camera.position.z += event.deltaY / 5;
-  
-    // prevent scrolling beyond a min/max value
-    //camera.position.clampScalar(0, 10);
+    if(bttn_click){
+        camera.position.z += event.deltaY / 5; 
+    } 
 }
 var camera_date;
 function animate() {
     
-    //controls.update();
     updateGUI();
-    //365/2 * ((z+h)/2h) = date_nr
     camera_date = parseInt(365*(camera.position.z + height)/(2*height));
     const date_el = document.querySelector('#date');
     var date_lit = date_dictionary.get(String(camera_date));
@@ -473,6 +520,12 @@ function animate() {
 
         renderer.render( scene, camera );
 
+    }
+    if(params.pixelSize > 4 && bttn_click){
+        params.pixelSize -= 0.1;
+    }
+    else{
+        params.pixelSize = params.pixelSize;
     }
 	//stats.update();
 
@@ -712,10 +765,19 @@ function reInitWNewDates(values) {
     //console.log(dat_es.conversation_id)
 
 	for ( let i = 0, l = positionAttribute.count; i < l; i ++ ) {
-        //var color = new THREE.Color();
-        //color.setHSL( Math.random() * 0xffffff );
-		//color.toArray( colors, i * 3 );
 		sizes[ i ] = PARTICLE_SIZE * 1.5;
+        let dup_col = lines_colors[dat_es[ i ].conversation_id]
+        if(dup_col){
+            //console.log("bla");
+            colors[i*3 + 0] = dup_col[0].x;
+            colors[i*3 + 1] = dup_col[0].y;
+            colors[i*3 + 2] = dup_col[0].z;
+        } 
+        else {
+            colors[i * 3 + 0] = Math.random();
+            colors[i * 3 + 1] = Math.random();
+            colors[i * 3 + 2] = Math.random();
+        }
         tw_text[ i ] = dat_es[ i ].text;
         user_name[ i ] = dat_es[ i ]['author.username'];
         user_pfp[ i ] = dat_es[ i ]['author.profile_image_url'];

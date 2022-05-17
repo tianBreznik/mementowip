@@ -188,6 +188,7 @@
             width: 175px;
             text-align: center;
             padding-top: 15px;
+            opacity: 0.0;
         }
 
         #footer{
@@ -217,6 +218,41 @@
             height: 2.725em;
             text-align: center;
             padding-top: 15px;
+            opacity: 0.0;
+        }
+
+
+        #intro {
+            font-family: "usaname_f";
+            color:rgb(255, 66, 66);
+            bottom: 8.45em;
+            left: 30.85em;
+            right: 1em;
+            position: absolute;
+            z-index: 1;
+            border-radius: .5em;
+            border: 1px solid rgb(255, 66, 66);
+            height: 30.725em;
+            width: 30em;
+            text-align: center;
+            padding-top: 15px;
+            padding-left: 30px;
+            padding-right: 30px;
+            /*display:none;*/
+        }
+
+        #continue {
+
+            font-family: "usaname_f";
+            background-color: white; 
+            border: 1px solid rgb(255, 66, 66);
+            border-radius: .5em;
+            color:rgb(255, 66, 66);
+            margin-top:0.5em;
+            width: 10em;
+            height: 3em;
+            cursor: pointer;
+
         }
 
         canvas {
@@ -243,6 +279,7 @@
           width: 175px;    
           padding-left: 0.5em;
           margin-top: 0.5em;
+          opacity: 0.0;
         }
 
         /*style the arrow inside the select element:*/
@@ -315,6 +352,12 @@
     <div id="footer">
         <h2 id="date">Nema</h2>
         <p id="prettythoughts">I've had dreams so wonderful that I decide that they are memories. I relive them often and savor their sweetness until they are interchangeable with what's happened in my waking life. This is my greatest coping mechanism.</p>
+        <div id="intro" class="incognito">
+            <p>For my Design Informatics project I have decided to explore the dynamics of our collective discourse and “memory” on the internet through the lens of Twitter.</br></br> The central premise I would like to explore is how far in time a certain piece of news or a news topic/hashtag travels with relation to the concept of “information fatigue”,  which is a form of mental exhaustion arising from being exposed to and trying to assimilate too much information at once from various media, online spaces and everyday life. It leads to individuals becoming numb to it and hence reduces the actual meaningfulness of new information and the aspect of reality it represents. 
+            </br></br>I take the perspective of data art to communicate the sense of incomprehension that often overwhelms me when navigating online spaces. This indeed makes me feel numb and renders my opinion seemingly insignificant in this vast sea of incoherent subjectivity. I feel pressured to define a solid counter stance to every piece of online writing that I come across, and it makes my soul feel expendable and drained. This project is meant to visualize the mess that exists in my mind when I am existing through online cultures.
+             </p>
+            <button id="continue" onclick="enter_continue()">CONTINUE</button>
+        </div>
     </div>
     <div class="annotation">
         <div id="header">
