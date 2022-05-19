@@ -287,6 +287,7 @@ function init() {
         }
     })
     window.addEventListener( 'wheel', onWheelScroll, false );
+    window.addEventListener("keydown", onDocumentKeyDown, false);
     //experiment
     document.addEventListener("click", closeAllSelect);
     console.log(document.getElementById("selelelect"));
@@ -491,6 +492,19 @@ function onWheelScroll(event) {
     if(bttn_click){
         camera.position.z += event.deltaY / 5; 
     } 
+}
+
+var zoomFactor = 1.03;
+function onDocumentKeyDown(event) {
+    var keyCode = event.which;
+    if(keyCode == 87){
+        camera.fov /= zoomFactor;
+        camera.updateProjectionMatrix();
+    }
+    else if(keyCode == 83){
+        camera.fov *= zoomFactor;
+        camera.updateProjectionMatrix();
+    }
 }
 var camera_date;
 function animate() {
