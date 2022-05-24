@@ -270,6 +270,7 @@ function init() {
 
 	window.addEventListener( 'resize', onWindowResize );
 	window.addEventListener( 'pointermove', onPointerMove );
+    window.addEventListener( 'load', typeWriter);
     //document.getElementById("intro").addEventListener("mouseenter", function(  ) {isOnDiv=true;});
     //document.getElementById("intro").addEventListener("mouseout", function(  ) {isOnDiv=false;});
     console.log(camera.position);
@@ -550,6 +551,23 @@ var prev_intersect = particles[ 0 ];
 function render() {
 	renderer.render( scene, camera );
 
+}
+
+var i = 0;
+var txt = 'TThis tangled mess of lines and points represents the state of our collective discourse on the internet through the lens of tweets on a specific topic categorized under a hashtag. For every hashtag in the dropdown list you see a dataset of tweets pulled for the duration of 2021. Every little point is a tweet you can hover over to see what wisdom the Tweeter had to share with the world and what they think they’re all about (bio). The tweets that are connected by lines are part of the same thread.\nSeriously though, the central premise explored is how far in time a certain piece of news or a news topic/hashtag travels with relation to the concept of “information fatigue”,  which is a form of mental exhaustion arising from being exposed to and trying to assimilate too much information at once from various media, online spaces and everyday life. It leads to individuals becoming numb to it and hence reduces the actual meaningfulness of new information and the aspect of reality it represents. Twitter shaping itself up to become an online representation of our egos unapologetically expressing themselves becomes the ultimate data source for this experiment.\nA sense of incomprehension that often overwhelms me when navigating online spaces. This indeed makes me feel numb and renders my opinion seemingly insignificant in this vast sea of incoherent subjectivity. I feel pressured to define a solid counter stance to every piece of online writing that I come across, and it makes my soul feel expendable and drained. This project is meant to visualize the mess that exists in my mind when I am existing through online cultures.';
+var speed = 25;
+
+function typeWriter() {
+  if (i < txt.length) {
+    if(txt.charAt(i) == '\n'){
+        document.getElementById("ptext").innerHTML += '</br></br>';
+    }
+    else{
+        document.getElementById("ptext").innerHTML += txt.charAt(i);
+    }
+    i++;
+    setTimeout(typeWriter, speed);
+  }
 }
 
 function loadJSON(filePath) {
