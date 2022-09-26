@@ -149,8 +149,6 @@ function init() {
 
     //const colors = [];
 	const sizes = [];
-	
-    //const tw_urls = [];
 
     //console.log(dat_es.conversation_id)
     console.log(positionAttribute.count);
@@ -204,6 +202,8 @@ function init() {
 
 	particles = new THREE.Points( geometry, material );
 	scene.add( particles );
+
+
 	//lines
     parentTransform = new THREE.Object3D();
     for(var key in lines){
@@ -424,19 +424,21 @@ function onPointerMove( event ) {
             );
         
             glue_vec.project(camera);
-        
             glue_vec.x = Math.round((0.5 + glue_vec.x / 2) * (canvas.width / window.devicePixelRatio));
             glue_vec.y = Math.round((0.5 - glue_vec.y / 2) * (canvas.height / window.devicePixelRatio));
+
+            var glue_col = new THREE.Vector3(
+                attributes.customColor.array[ particle.index * 3],
+                attributes.customColor.array[ particle.index * 3 + 1],
+                attributes.customColor.array[ particle.index * 3 + 2],
+            )
         
             const annotation = document.querySelector('.annotation');
             annotation.children[0].lastChild.firstChild.innerHTML = "<strong>" + user_name[ particle.index ] + "</strong> |  ";
             annotation.children[0].lastChild.firstChild.style.color = "#" + Math.floor(Math.random()*16777215).toString(16);
             annotation.style.top = `${glue_vec.y}px`;
-            annotation.style.left = `${glue_vec.x}px`;
-            console.log(conv_ids[ particle.index]);
-    
+            annotation.style.left = `${glue_vec.x}px`;    
             annotation.children[0].firstChild.src = user_pfp[ particle.index ];
-        
             annotation.children[0].lastChild.lastChild.innerHTML = auth_name[ particle.index ];
         
             var newline_tw = tw_text[ particle.index ].split(/\r\n|\r|\n/g);
@@ -448,8 +450,8 @@ function onPointerMove( event ) {
             annotation.children[2].lastChild.innerHTML = newline_tw;
             annotation.children[2].style.width = `${document.getElementById('header').offsetWidth}px`;
             annotation.style.display = `block`;
-    
             annotation.children[3].innerHTML = date_tw[particle.index];
+            annotation.style.borderColor = "#" + Math.floor(Math.random()*16777215).toString(16);;
     
             /**
              * FIX LATER - ZA SUMNIKE FONT ZRIHTAJ!
@@ -536,7 +538,8 @@ function animate() {
         renderer.render( scene, camera );
 
     }
-    if(params.pixelSize > 4 && bttn_click){
+    if(params.pixelSize > 4 && bttn_click && first == 0){
+        console.log(first);
         params.pixelSize -= 0.1;
     }
     else{
@@ -555,7 +558,7 @@ function render() {
 
 var i = 0;
 var txt = 'TThis tangled mess of lines and points represents the state of our collective discourse on the internet through the lens of tweets on a specific topic categorized under a hashtag. For every hashtag in the dropdown list you see a dataset of tweets pulled for the duration of 2021. Every little point is a tweet you can hover over to see what wisdom the Tweeter had to share with the world and what they think they’re all about (bio). The tweets that are connected by lines are part of the same thread.\nSeriously though, the central premise explored is how far in time a certain piece of news or a news topic/hashtag travels with relation to the concept of “information fatigue”,  which is a form of mental exhaustion arising from being exposed to and trying to assimilate too much information at once from various media, online spaces and everyday life. It leads to individuals becoming numb to it and hence reduces the actual meaningfulness of new information and the aspect of reality it represents. Twitter shaping itself up to become an online representation of our egos unapologetically expressing themselves becomes the ultimate data source for this experiment.\nA sense of incomprehension that often overwhelms me when navigating online spaces. This indeed makes me feel numb and renders my opinion seemingly insignificant in this vast sea of incoherent subjectivity. I feel pressured to define a solid counter stance to every piece of online writing that I come across, and it makes my soul feel expendable and drained. This project is meant to visualize the mess that exists in my mind when I am existing through online cultures.';
-var speed = 25;
+var speed = 40;
 
 function typeWriter() {
   if (i < txt.length) {
@@ -786,7 +789,7 @@ function reInitWNewDates(values) {
 
     //randomize sprite colors
 	buff_geometry = new BufferGeometry()
-    buff_geometry.setAttribute('position', new BufferAttribute(p_positions, 3))			
+    buff_geometry.setAttribute('position', new BufferAttribute(p_positions, 3))	
 	const positionAttribute = buff_geometry.getAttribute( 'position' );
 
     //const colors = [];
