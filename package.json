@@ -1,5 +1,6 @@
 {
   "repository": "#",
+  "homepage": "https://tianbreznik.github.io/mementowip/",
   "license": "UNLICENSED",
   "scripts": {
     "build": "webpack --config ./bundler/webpack.prod.js",
