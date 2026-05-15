@@ -29,6 +29,8 @@ let parentTransform;
 const PARTICLE_SIZE = 20;
 let raycaster, intersects, intersects_lines, date_dictionary;
 let pointer, INTERSECTED;
+const PARTICLE_SIZE_BASE = PARTICLE_SIZE * 1.5;
+const PARTICLE_SIZE_HOVER = PARTICLE_SIZE * 2.25;
 width = window.innerWidth;
 height = window.innerHeight;
 
@@ -50,6 +52,77 @@ let pixelPass, params;
 let mouseDown = false;
 let scale = 5.0;
 const perlin = new ImprovedNoise();
+
+function decodeHtmlEntities( raw ) {
+
+	if ( raw == null || raw === '' ) return '';
+	const t = document.createElement( 'textarea' );
+	t.innerHTML = String( raw );
+	return t.value;
+
+}
+
+function normalizeDisplayText( raw ) {
+
+	if ( raw == null ) return '';
+	let s = decodeHtmlEntities( String( raw ) );
+	s = s.replace( /\\r\\n/g, '\n' );
+	s = s.replace( /\\n/g, '\n' );
+	s = s.replace( /\\r/g, '\n' );
+	s = s.replace( /\r\n/g, '\n' );
+	s = s.replace( /\r/g, '\n' );
+	s = s.replace( /\u00a5n/gi, '\n' );
+	s = s.replace( /[\u005c\u00a5]+(?=https?:\/\/)/gi, '\n' );
+	s = s.replace( /[\u005c\u00a5]+$/g, '' );
+	return s.trimEnd();
+
+}
+
+function getAnnotationBottomLimit() {
+
+	const pad = 12;
+	let maxBottom = window.innerHeight - pad;
+	const ids = [ 'date', 'prettythoughts' ];
+	for ( let i = 0; i < ids.length; i++ ) {
+
+		const node = document.getElementById( ids[ i ] );
+		if ( ! node ) continue;
+		const cs = window.getComputedStyle( node );
+		if ( cs.display === 'none' || cs.visibility === 'hidden' ) continue;
+		if ( parseFloat( cs.opacity ) < 0.05 ) continue;
+		const r = node.getBoundingClientRect();
+		if ( r.width < 1 || r.height < 1 ) continue;
+		maxBottom = Math.min( maxBottom, r.top - pad );
+
+	}
+	return Math.max( maxBottom, pad );
+
+}
+
+function clampAnnotationToViewport( el, preferredLeft, preferredTop ) {
+
+	const pad = 12;
+	el.style.left = `${preferredLeft}px`;
+	el.style.top = `${preferredTop}px`;
+	for ( let n = 0; n < 6; n++ ) {
+
+		const bottomLimit = getAnnotationBottomLimit();
+		const r = el.getBoundingClientRect();
+		let dx = 0;
+		let dy = 0;
+		if ( r.right > window.innerWidth - pad ) dx = window.innerWidth - pad - r.right;
+		if ( r.bottom > bottomLimit ) dy = bottomLimit - r.bottom;
+		if ( r.left + dx < pad ) dx = pad - r.left;
+		if ( r.top + dy < pad ) dy = pad - r.top;
+		if ( dx === 0 && dy === 0 ) return;
+		const curL = parseFloat( el.style.left ) || preferredLeft;
+		const curT = parseFloat( el.style.top ) || preferredTop;
+		el.style.left = `${curL + dx}px`;
+		el.style.top = `${curT + dy}px`;
+
+	}
+
+}
 
 
 init();
@@ -156,7 +229,7 @@ function init() {
         //var color = new THREE.Color();
         //color.setHSL( Math.random() * 0xffffff );
 		//color.toArray( colors, i * 3 );
-		sizes[ i ] = PARTICLE_SIZE * 1.5;
+		sizes[ i ] = PARTICLE_SIZE_BASE;
         let dup_col = lines_colors[dat_es[ i ].conversation_id]
         if(dup_col){
             //console.log("bla");
@@ -427,51 +500,39 @@ function onPointerMove( event ) {
             glue_vec.x = Math.round((0.5 + glue_vec.x / 2) * (canvas.width / window.devicePixelRatio));
             glue_vec.y = Math.round((0.5 - glue_vec.y / 2) * (canvas.height / window.devicePixelRatio));
 
-            var glue_col = new THREE.Vector3(
-                attributes.customColor.array[ particle.index * 3],
-                attributes.customColor.array[ particle.index * 3 + 1],
-                attributes.customColor.array[ particle.index * 3 + 2],
-            )
-        
-            const annotation = document.querySelector('.annotation');
-            annotation.children[0].lastChild.firstChild.innerHTML = "<strong>" + user_name[ particle.index ] + "</strong> |  ";
-            annotation.children[0].lastChild.firstChild.style.color = "#" + Math.floor(Math.random()*16777215).toString(16);
-            annotation.style.top = `${glue_vec.y}px`;
-            annotation.style.left = `${glue_vec.x}px`;    
-            annotation.children[0].firstChild.src = user_pfp[ particle.index ];
-            annotation.children[0].lastChild.lastChild.innerHTML = auth_name[ particle.index ];
-        
-            var newline_tw = tw_text[ particle.index ].split(/\r\n|\r|\n/g);
-            //(newline_tw);
-            const match = /\r|\n/.exec(tw_text[particle.index].trim());
-    
-            annotation.children[1].lastChild.innerHTML = user_desc[particle.index];
-            annotation.children[1].style.width = `${document.getElementById('header').offsetWidth}px`;
-            annotation.children[2].lastChild.innerHTML = newline_tw;
-            annotation.children[2].style.width = `${document.getElementById('header').offsetWidth}px`;
+            const annotation = document.querySelector( '.annotation' );
+            const usanameEl = document.getElementById( 'usaname' );
+            usanameEl.replaceChildren();
+            const strongEl = document.createElement( 'strong' );
+            strongEl.textContent = normalizeDisplayText( user_name[ particle.index ] );
+            usanameEl.appendChild( strongEl );
+            usanameEl.appendChild( document.createTextNode( ' |  ' ) );
+            usanameEl.style.color = '#' + Math.floor( Math.random() * 16777215 ).toString( 16 );
+            document.getElementById( 'pfp' ).src = user_pfp[ particle.index ];
+            document.getElementById( 'namename' ).textContent = normalizeDisplayText( auth_name[ particle.index ] );
+
+            document.getElementById( 'desc' ).textContent = normalizeDisplayText( user_desc[ particle.index ] );
+            document.getElementById( 'tweet' ).textContent = normalizeDisplayText( tw_text[ particle.index ] );
             annotation.style.display = `block`;
-            annotation.children[3].innerHTML = date_tw[particle.index];
-            annotation.style.borderColor = "#" + Math.floor(Math.random()*16777215).toString(16);;
-    
-            /**
-             * FIX LATER - ZA SUMNIKE FONT ZRIHTAJ!
-             */
-            // if(document.getElementById("selelelect") == "#dovolJJ")
-            // {
-            //     var element_desc = document.getElementById("desc");
-            //     element_desc.style.fontFamily = "monospace";
-    
-            //     var element_tweet = document.getElementById("tweet");
-            //     element_tweet.style.fontFamily = "monospace";
-            // }
-            console.log(like_cnt[particle.index]);
-            attributes.size.array[ particle.index ] = PARTICLE_SIZE;
-            attributes.size.array[ particle.index ] = PARTICLE_SIZE * like_cnt[particle.index];
+            document.getElementById( 'tw_date' ).textContent = date_tw[ particle.index ] != null ? String( date_tw[ particle.index ] ) : '';
+            annotation.style.borderColor = '#' + Math.floor( Math.random() * 16777215 ).toString( 16 );
+            const canvasRect = canvas.getBoundingClientRect();
+            clampAnnotationToViewport( annotation, glue_vec.x + canvasRect.left, glue_vec.y + canvasRect.top );
+
+            if ( INTERSECTED !== null && INTERSECTED !== particle.index ) {
+                attributes.size.array[ INTERSECTED ] = PARTICLE_SIZE_BASE;
+            }
+            attributes.size.array[ particle.index ] = PARTICLE_SIZE_HOVER;
             attributes.size.needsUpdate = true;
+            INTERSECTED = particle.index;
         }
         else {
             //console.log('not intersecting nothing');
-            //attributes.size.array[ particle.index ] = PARTICLE_SIZE * 1.5;
+            if ( INTERSECTED !== null ) {
+                attributes.size.array[ INTERSECTED ] = PARTICLE_SIZE_BASE;
+                attributes.size.needsUpdate = true;
+                INTERSECTED = null;
+            }
             const annotation = document.querySelector('.annotation');
             annotation.style.display = `none`;
         }
@@ -685,6 +746,7 @@ function reInitWNewDates(values) {
     console.log(values);
     scene.remove(parentTransform);
     scene.remove(particles);
+    INTERSECTED = null;
     camera.position.z = -height;
     //camera.rotation.y = 180 * THREE.Math.DEG2RAD;
     console.log(camera.rotation);
@@ -800,7 +862,7 @@ function reInitWNewDates(values) {
     //console.log(dat_es.conversation_id)
 
 	for ( let i = 0, l = positionAttribute.count; i < l; i ++ ) {
-		sizes[ i ] = PARTICLE_SIZE * 1.5;
+		sizes[ i ] = PARTICLE_SIZE_BASE;
         let dup_col = lines_colors[dat_es[ i ].conversation_id]
         if(dup_col){
             //console.log("bla");

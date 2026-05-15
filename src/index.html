@@ -61,7 +61,9 @@
             margin-left: 15px;
             margin-top: 15px;
             padding: 1em;
+            box-sizing: border-box;
             width: max-content;
+            max-width: min(90vw, 28rem);
             color: rgb(0, 0, 0);
             background: rgb(255, 255, 255);
             border-radius: .5em;
@@ -73,11 +75,14 @@
             border-style: solid;
             /*border-color:rgb(56, 196, 252);*/
             text-align: left;
+            overflow-x: hidden;
         }
 
         #usaname 
         {
             font-family: "usaname_f";
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
 
         #tweet_div {
@@ -86,6 +91,8 @@
             margin-bottom: 0.5em;
             font-family: "Asap Condensed";
             display:grid;
+            max-width: 100%;
+            min-width: 0;
         }
 
         #brd_tweet {
@@ -101,6 +108,13 @@
         {
             font-family: "Asap Condensed";
             white-space: pre-line;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            max-height: min(38vh, 16rem);
+            overflow-y: auto;
+            margin: 0;
+            padding: 0.35em 0.5em 0.5em;
+            box-sizing: border-box;
         }
 
         #desc_div 
@@ -110,6 +124,8 @@
             margin-bottom: 1.1em;
             font-family: "Asap Condensed";
             display:grid;
+            max-width: 100%;
+            min-width: 0;
         }
         
 
@@ -123,19 +139,33 @@
 
         #desc 
         {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            max-height: min(22vh, 10rem);
+            overflow-y: auto;
+            margin: 0;
+            padding: 0.35em 0.5em 0.5em;
+            box-sizing: border-box;
         }
 
         #namename 
         {
             font-family: "Asap Condensed";
             margin-bottom: 0.5em;
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
 
         #tw_date {
             font-family: "usaname_f";
             border-radius: .5em;
             background-color: rgb(255, 226, 62); 
-            width:130px;
+            max-width: 100%;
+            width: auto;
+            box-sizing: border-box;
+            padding: 0.25em 0.5em;
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
         .webgl
         {
@@ -186,16 +216,29 @@
             z-index: 1;
             border-radius: .5em;
             border: 1px solid rgb(255, 66, 66);
-            height: 1.875em;
+            box-sizing: border-box;
+            min-height: 1.875em;
             width: 175px;
+            max-width: calc(100vw - 1.5em);
             text-align: center;
-            padding-top: 15px;
+            padding: 10px 8px;
             opacity: 0.0;
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
 
         #footer{
-            display: inline;
-            vertical-align:middle;
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 5;
+            min-height: 0;
+            pointer-events: none;
+        }
+
+        #footer > * {
+            pointer-events: auto;
         }
 
         #datasets {
@@ -217,10 +260,17 @@
             z-index: 1;
             border-radius: .5em;
             border: 1px solid rgb(255, 66, 66);
-            height: 2.725em;
-            text-align: center;
-            padding-top: 15px;
+            box-sizing: border-box;
+            min-height: 2.725em;
+            max-height: min(30vh, 12rem);
+            text-align: left;
+            padding: 10px 14px;
             opacity: 0.0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            line-height: 1.35;
         }
 
 
